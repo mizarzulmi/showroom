@@ -3,6 +3,9 @@ const cors = require("cors");
 
 const app = express();
 
+process.env.TZ = 'Etc/Asia';
+// console.log(new Date().toString())
+
 var corsOptions = {
     origin: "http://localhost:8081"
 };
@@ -23,36 +26,6 @@ const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}.`);
 });
-
-
-// model
-// const db = require("./app/models");
-// const Role = db.role;
-
-// db.sequelize.sync({
-//     force: true
-// }).then(() => {
-//     console.log('Drop and Resync Db');
-//     initial();
-// });
-
-
-// function initial() {
-//     Role.create({
-//         id_peran: 1,
-//         name: "pengguna"
-//     });
-
-//     Role.create({
-//         id_peran: 2,
-//         name: "admin"
-//     });
-
-//     Role.create({
-//         id_peran: 3,
-//         name: "atasan"
-//     });
-// }
 
 
 // routes

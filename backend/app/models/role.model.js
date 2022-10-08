@@ -22,7 +22,7 @@ module.exports = (sequelize, Sequelize) => {
     soft_delete: {
       allowNull: false,
       type: Sequelize.INTEGER,
-      defaultValue: 1,
+      defaultValue: 0,
     },
   }, {
     tableName: 'peran',

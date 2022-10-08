@@ -2,7 +2,6 @@ module.exports = (sequelize, Sequelize) => {
   const User = sequelize.define("pengguna", {
     id_pengguna: {
       type: Sequelize.UUID,
-      defaultValue: Sequelize.UUIDV4,
       primaryKey: true,
       allowNull: false,
     },
@@ -24,10 +23,15 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.DATE,
       defaultValue: Sequelize.NOW
     },
-    soft_delete: {
+    a_aktif: {
       allowNull: false,
       type: Sequelize.INTEGER,
       defaultValue: 1,
+    },
+    soft_delete: {
+      allowNull: false,
+      type: Sequelize.INTEGER,
+      defaultValue: 0,
     }
   }, {
     tableName: 'pengguna',

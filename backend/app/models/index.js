@@ -9,7 +9,7 @@ const sequelize = new Sequelize(
     host: config.HOST,
     dialect: config.dialect,
     operatorsAliases: 0,
-
+    timezone: "+07:00",
     pool: {
       max: config.pool.max,
       min: config.pool.min,
@@ -26,12 +26,20 @@ db.sequelize = sequelize;
 
 db.user = require("../models/user.model.js")(sequelize, Sequelize);
 db.role = require("../models/role.model.js")(sequelize, Sequelize);
+db.user_role = require("../models/user_role.model.js")(sequelize, Sequelize);
+
+// db.user.hasMany(db.user_role, { as: "user_role" });
+// db.user_role.belongsTo(db.user, {
+//   foreignKey: "id_pengguna",
+//   as: "user",
+// });
 
 db.role.belongsToMany(db.user, {
   through: "role_pengguna",
   foreignKey: "id_peran",
   otherKey: "id_pengguna"
 });
+
 db.user.belongsToMany(db.role, {
   through: "role_pengguna",
   foreignKey: "id_pengguna",

@@ -18,16 +18,16 @@ verifyToken = (req, res, next) => {
                 message: "Unauthorized!"
             });
         }
-        req.userId = decoded.id;
+        req.id_pengguna = decoded.id_pengguna;
         next();
     });
 };
 
 isAdmin = (req, res, next) => {
     User.findByPk(req.id_pengguna).then(user => {
-        user.getRoles().then(roles => {
+        user.getPerans().then(roles => {
             for (let i = 0; i < roles.length; i++) {
-                if (roles[i].name === "admin") {
+                if (roles[i].nm_peran === "admin") {
                     next();
                     return;
                 }
@@ -42,9 +42,9 @@ isAdmin = (req, res, next) => {
 
 isAtasan = (req, res, next) => {
     User.findByPk(req.id_pengguna).then(user => {
-        user.getRoles().then(roles => {
+        user.getPerans().then(roles => {
             for (let i = 0; i < roles.length; i++) {
-                if (roles[i].name === "atasan") {
+                if (roles[i].nm_peran === "atasan") {
                     next();
                     return;
                 }
@@ -61,7 +61,7 @@ isAtasan = (req, res, next) => {
 
 // isAtasanOrAdmin = (req, res, next) => {
 //     User.findByPk(req.id_pengguna).then(user => {
-//         user.getRoles().then(roles => {
+//         user.getPerans().then(roles => {
 //             for (let i = 0; i < roles.length; i++) {
 //                 if (roles[i].name === "atasan") {
 //                     next();
