@@ -22,7 +22,7 @@ exports.store = (req, res) => {
     Role.create(role)
         .then(data => {
             res.send({
-                message: "Data berhasil disimpan!",
+                message: "Create successfully",
                 data: data
             });
         })

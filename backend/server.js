@@ -38,3 +38,4 @@ app.get("/", (req, res) => {
 require('./app/routes/auth.routes')(app);
 require('./app/routes/user.routes')(app);
 require('./app/routes/role.routes')(app);
+require('./app/routes/merek.routes')(app);
