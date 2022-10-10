@@ -1,5 +1,5 @@
 const { authJwt } = require("../middleware");
-const controller = require("../controllers/merek.controller");
+const controller = require("../controllers/mobil.controller");
 var router = require("express").Router();
 
 module.exports = function (app) {
@@ -17,5 +17,5 @@ module.exports = function (app) {
     router.put("/update", [authJwt.verifyToken, authJwt.isAdmin], controller.update);
     router.delete("/delete", [authJwt.verifyToken, authJwt.isAdmin], controller.delete);
 
-    app.use('/api/merek', router);
+    app.use('/api/mobil', router);
 };

@@ -39,3 +39,5 @@ require('./app/routes/auth.routes')(app);
 require('./app/routes/user.routes')(app);
 require('./app/routes/role.routes')(app);
 require('./app/routes/merek.routes')(app);
+require('./app/routes/mobil.routes')(app);
+require('./app/routes/pemesanan.routes')(app);

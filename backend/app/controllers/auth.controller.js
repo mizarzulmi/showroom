@@ -1,9 +1,7 @@
 const db = require("../models");
 const config = require("../config/auth.config");
 var log = require('../config/winston');
-const {
-  v4: uuidv4
-} = require('uuid');
+const { v4: uuidv4 } = require('uuid');
 
 const User = db.user;
 const Role = db.role;
@@ -13,9 +11,7 @@ const Op = db.Sequelize.Op;
 
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
-const {
-  user_role
-} = require("../models");
+const { user_role } = require("../models");
 
 exports.signup = (req, res) => {
   const id_pengguna = uuidv4();
@@ -42,7 +38,7 @@ exports.signup = (req, res) => {
         });
       } else {
         // user role = 1 = pengguna
-        user.setPerans([1]).then(() => {
+        user.setPerans([52]).then(() => {
           res.status(201).send({
             message: "User registered successfully!",
             data: user
