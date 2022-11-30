@@ -1,28 +1,74 @@
 const db = require("../models");
 var log = require('../config/winston');
+var bcrypt = require("bcryptjs");
 const { v4: uuidv4 } = require('uuid');
 
 const Pemesanan = db.pemesanan;
 const User = db.user;
 const Profil = db.profil_pengguna;
+const Mobil = db.mobil;
 const Role = db.role;
 const Op = db.Sequelize.Op;
+const Conn = db.sequelize;
 
-exports.findAll = (req, res) => {
-    Pemesanan.findAll()
-        .then(data => {
-            res.status(200).send({
-                message: "Get mobil successfully!",
-                data: data
-            });
-        })
-        .catch(err => {
-            res.status(500).send({
-                message: err.message || "Some error occurred while retrieving tutorials."
-            });
+//list pesanan
+exports.findAll = async (req, res, next) => {
+    try {
+        let sql = `
+            SELECT
+                psn.id_pemesanan,
+                psn.status_pembelian,
+                psn.harga_pembelian,
+                psn.ket AS ket_pesan,
+                psn.wkt_pembelian,
+                mbl.id_mobil,
+                mbl.model,
+                mbl.transmisi,
+                mbl.no_rangka,
+                mbl.no_mesin,
+                mbl.warna,
+                mbl.tahun,
+                mbl.no_plat,
+                mbl.harga,
+                mbl.ket AS ket_mobil,
+                mbl.create_date AS wkt_tambah_mobil,
+                pembeli.nama_lengkap AS nm_pembeli,
+                pembeli.jk,
+                pembeli.tmpt_lahir,
+                pembeli.tgl_lahir,
+                pembeli.email,
+                pembeli.tlpn_hp,
+                pembeli.alamat,
+                pembeli.nik,
+                pembeli.create_date AS wkt_tambah_pembeli
+            FROM
+                pemesanan AS psn
+                LEFT JOIN mobil AS mbl ON mbl.id_mobil = psn.id_mobil
+                AND mbl.soft_delete = 0
+                LEFT JOIN merek_mobil AS mrk ON mrk.id_merek_mobil = mbl.id_merek_mobil
+                AND mrk.soft_delete = 0
+                LEFT JOIN profil_pengguna AS pembeli ON pembeli.id_profil = psn.id_pembeli
+                AND pembeli.soft_delete = 0
+            WHERE
+                psn.soft_delete = 0`;
+                
+        const [results] = await Conn.query(sql);
+        
+        res.status(200).send({
+            message: "Get list pesanan successfully!",
+            data: results
         });
+    } catch (error) {
+        log.error(error)
+        res.status(400).send({
+            message: error.message || "Some error occurred while retrieving pesanan."
+        });
+        next();
+    }
+
 };
 
+//buat pesanan
 exports.create = (req, res) => {
     // Validate request
     if (!req.body.nama_lengkap && !req.body.jk && !req.body.tlpn_hp && !req.body.alamat && !req.body.nik && !req.body.status_pembelian && !req.body.harga_pembelian) {
@@ -32,155 +78,185 @@ exports.create = (req, res) => {
         return;
     }
 
-    Pemesanan.findOne({
+    //cek mobil
+    Mobil.findOne({
         where: {
             id_mobil: req.body.id_mobil,
             soft_delete: 0,
         }
-    }).then(mobil => {
-        if (mobil) {
+    }).then(cek_mobil => {
+        if (!cek_mobil) {
             res.status(400).send({
-                message: "Failed! Mobil is already sold!"
+                message: "Failed! Mobil is not found!"
             });
             return;
         } else {
-            const id_pengguna = uuidv4();
-            const id_profil = uuidv4();
-            const createValuesDaftar = {
-                id_pengguna: id_pengguna,
-                username: req.body.tlpn_hp,
-                password: bcrypt.hashSync(req.body.tlpn_hp, 8)
-            };
-
-            const createValuesProfil = {
-                id_profil: id_profil,
-                id_pengguna: id_pengguna,
-                nama_lengkap: req.body.nama_lengkap,
-                jk: req.body.jk,
-                tmpt_lahir: req.body.tmpt_lahir,
-                tgl_lahir: req.body.tgl_lahir,
-                email: req.body.email,
-                tlpn_hp: req.body.tlpn_hp,
-                alamat: req.body.alamat,
-                nik: req.body.nik
-            };
-
-            const createValuesPemesanan = {
-                id_pemesanan: uuidv4(),
-                id_mobil: req.body.id_mobil,
-                id_pembeli: id_profil,
-                status_pembelian: req.body.status_pembelian,
-                harga_pembelian: req.body.harga_pembelian,
-                ket: req.body.ket,
-                wkt_pembelian: req.body.wkt_pembelian
-            };
-
-            try {
-
-                User.create(createValuesDaftar)
-                    .then(user => {
-                        user.setPerans([1])
-                            .then(role => {
-                                console.log(role);
-                                Profil.create(createValuesProfil)
-                                    .then(profil => {
-                                        console.log(profil);
-                                        Pemesanan.create(createValuesPemesanan)
-                                            .then(pemesanan => {
-                                                res.status(200).send({
-                                                    message: "Create successfully!",
-                                                    data: pemesanan
-                                                });
-                                            });
-                                    });
-                            });
-
-                    }).catch(err => {
-                        log.error(err)
-                        res.status(400).send({
-                            message: err.message || "Some error occurred while creating."
-                        });
+            //cek pesanan
+            Pemesanan.findOne({
+                where: {
+                    id_mobil: req.body.id_mobil,
+                    soft_delete: 0,
+                }
+            }).then(cek_pesanan => {
+                if (cek_pesanan) {
+                    res.status(400).send({
+                        message: "Failed! Mobil is already sold!"
                     });
+                    return;
+                } else {
+                    const id_pengguna = uuidv4();
+                    const id_profil = uuidv4();
+                    const createValuesDaftar = {
+                        id_pengguna: id_pengguna,
+                        username: req.body.tlpn_hp,
+                        password: bcrypt.hashSync(req.body.tlpn_hp, 8)
+                    };
 
-            } catch (error) {
-                console.log(error);
-                return res.send(`Error when trying upload images: ${error}`);
-            }
+                    const createValuesProfil = {
+                        id_profil: id_profil,
+                        id_pengguna: id_pengguna,
+                        nama_lengkap: req.body.nama_lengkap,
+                        jk: req.body.jk,
+                        tmpt_lahir: req.body.tmpt_lahir,
+                        tgl_lahir: req.body.tgl_lahir,
+                        email: req.body.email,
+                        tlpn_hp: req.body.tlpn_hp,
+                        alamat: req.body.alamat,
+                        nik: req.body.nik
+                    };
+
+                    const createValuesPemesanan = {
+                        id_pemesanan: uuidv4(),
+                        id_mobil: req.body.id_mobil,
+                        id_pembeli: id_profil,
+                        status_pembelian: req.body.status_pembelian,
+                        harga_pembelian: req.body.harga_pembelian,
+                        ket: req.body.ket,
+                        wkt_pembelian: req.body.wkt_pembelian
+                    };
+
+                    try {
+                        //cek username pembeli
+                        User.findOne({
+                            where: {
+                                username: req.body.tlpn_hp,
+                                soft_delete: 0,
+                            }
+                        }).then(pengguna => {
+                            if (pengguna) {
+                                res.status(400).send({
+                                    message: "Failed! Pengguna is already exists!"
+                                });
+                                return;
+                            } else {
+                                User.create(createValuesDaftar)
+                                    .then(user => {
+                                        user.setPerans([52])
+                                            .then(role => {
+                                                console.log(role);
+                                                Profil.create(createValuesProfil)
+                                                    .then(profil => {
+                                                        console.log(profil);
+                                                        Pemesanan.create(createValuesPemesanan)
+                                                            .then(pemesanan => {
+                                                                res.status(200).send({
+                                                                    message: "Create successfully!",
+                                                                    data: pemesanan
+                                                                });
+                                                            }).catch(err => {
+                                                                log.error(err)
+                                                                res.status(400).send({
+                                                                    message: err.message || "Some error occurred while creating."
+                                                                });
+                                                            });
+                                                    });
+                                            });
+
+                                    }).catch(err => {
+                                        log.error(err)
+                                        res.status(400).send({
+                                            message: err.message || "Some error occurred while creating."
+                                        });
+                                    });
+                            }
+                        });
+                    } catch (error) {
+                        console.log(error);
+                        return res.send(`Error when trying: ${error}`);
+                    }
+                }
+            });
         }
     });
 }
 
+//update pesanan
 exports.update = (req, res) => {
 
     const updateValues = {
+        id_pemesanan: req.body.id_pemesanan,
         id_mobil: req.body.id_mobil,
-        id_merek_mobil: req.body.id_merek_mobil,
-        id_penjual: req.body.id_penjual,
-        model: req.body.model,
-        transmisi: req.body.transmisi,
-        no_rangka: req.body.no_rangka,
-        no_mesin: req.body.no_mesin,
-        warna: req.body.warna,
-        tahun: req.body.tahun,
-        no_plat: req.body.no_plat,
-        harga: req.body.harga,
+        status_pembelian: req.body.status_pembelian,
+        harga_pembelian: req.body.harga_pembelian,
         ket: req.body.ket,
+        wkt_pembelian: req.body.wkt_pembelian,
         last_update: new Date()
     };
 
     Pemesanan.update(updateValues, {
             where: {
-                id_mobil: updateValues.id_mobil,
+                id_pemesanan: updateValues.id_pemesanan,
                 soft_delete: 0
             }
         })
         .then(num => {
             if (num == 1) {
                 res.send({
-                    message: "Mobil was updated successfully."
+                    message: "Pesanan was updated successfully."
                 });
             } else {
                 res.send({
-                    message: `Cannot update Mobil with id_mobil=${updateValues.id_mobil}. Maybe Mobil was not found or req.body is empty!`
+                    message: `Cannot update Pesanan with id_pemesanan=${updateValues.id_pemesanan}. Maybe Pesanan was not found or req.body is empty!`
                 });
             }
         })
         .catch(err => {
             log.error(err)
             res.status(500).send({
-                message: "Error updating Mobil with id_mobil=" + updateValues.id_mobil
+                message: "Error updating Pesanan with id_pemesanan=" + updateValues.id_pemesanan
             });
         });
 };
 
+//delete pesanan
 exports.delete = (req, res) => {
     const updateValues = {
-        id_mobil: req.body.id_mobil,
+        id_pemesanan: req.body.id_pemesanan,
         last_update: new Date(),
         soft_delete: 1
     }
 
     Pemesanan.update(updateValues, {
             where: {
-                id_mobil: updateValues.id_mobil,
+                id_pemesanan: updateValues.id_pemesanan,
                 soft_delete: 0
             }
         })
         .then(num => {
             if (num == 1) {
                 res.send({
-                    message: "Mobil was deleted successfully!"
+                    message: "Pesanan was deleted successfully!"
                 });
             } else {
                 res.send({
-                    message: `Cannot delete Mobil with id_mobil=${updateValues.id_mobil}. Maybe Mobil was not found!`
+                    message: `Cannot delete Pesanan with id_pemesanan=${updateValues.id_pemesanan}. Maybe Pesanan was not found!`
                 });
             }
         })
         .catch(err => {
             log.error(err)
             res.status(500).send({
-                message: "Could not delete Mobil with id_mobil=" + updateValues.id_mobil
+                message: "Could not delete Pesanan with id_pemesanan=" + updateValues.id_pemesanan
             });
         });
 };

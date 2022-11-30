@@ -4,7 +4,11 @@ const Merek = db.merek;
 const Op = db.Sequelize.Op;
 
 exports.findAll = (req, res) => {
-    Merek.findAll()
+    Merek.findAll({
+            where: {
+                soft_delete: 0
+            }
+        })
         .then(data => {
             res.status(200).send({
                 message: "Get merek successfully!",
@@ -26,7 +30,6 @@ exports.create = (req, res) => {
         });
         return;
     }
-
 
     Merek.findOne({
         where: {

@@ -15,7 +15,8 @@ const sequelize = new Sequelize(
       min: config.pool.min,
       acquire: config.pool.acquire,
       idle: config.pool.idle
-    }
+    },
+    logging: false
   }
 );
 
@@ -50,6 +51,8 @@ db.user.belongsToMany(db.role, {
   otherKey: "id_peran"
 });
 
+
 db.ROLES = ["pengguna", "admin", "atasan"];
 
 module.exports = db;
+

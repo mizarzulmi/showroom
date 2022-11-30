@@ -57,7 +57,7 @@ module.exports = (sequelize, Sequelize) => {
             defaultValue: 0
         },
     }, {
-        tableName: 'pemesanan',
+        tableName: 'profil_pengguna',
         timestamps: false,
     });
 

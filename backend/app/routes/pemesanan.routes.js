@@ -11,11 +11,11 @@ module.exports = function (app) {
         next();
     });
 
-    // router.get("/", [authJwt.verifyToken, authJwt.isAdmin], controller.findAll);
+    router.get("/", [authJwt.verifyToken, authJwt.isAdmin], controller.findAll);
     // router.get("/:id", controller.findOne);
     router.post("/create", [authJwt.verifyToken, authJwt.isAdmin], controller.create);
-    // router.put("/update", [authJwt.verifyToken, authJwt.isAdmin], controller.update);
-    // router.delete("/delete", [authJwt.verifyToken, authJwt.isAdmin], controller.delete);
+    router.put("/update", [authJwt.verifyToken, authJwt.isAdmin], controller.update);
+    router.delete("/delete", [authJwt.verifyToken, authJwt.isAdmin], controller.delete);
 
     app.use('/api/pemesanan', router);
 };

@@ -1,11 +1,16 @@
 const db = require("../models");
 var log = require('../config/winston');
 const Mobil = db.mobil;
+const Merek = db.merek;
 const Op = db.Sequelize.Op;
 const { v4: uuidv4 } = require('uuid');
 
 exports.findAll = (req, res) => {
-    Mobil.findAll()
+    Mobil.findAll({
+            where: {
+                soft_delete: 0
+            }
+        })
         .then(data => {
             res.status(200).send({
                 message: "Get mobil successfully!",
@@ -28,47 +33,63 @@ exports.create = (req, res) => {
         return;
     }
 
-    Mobil.findOne({
+
+    Merek.findOne({
         where: {
-            no_rangka: req.body.no_rangka,
-            soft_delete: 0,
+            id_merek_mobil: req.body.id_merek_mobil,
+            soft_delete: 0
         }
-    }).then(mobil => {
-        if (mobil) {
+    }).then(merek => {
+        if (!merek) {
             res.status(400).send({
-                message: "Failed! Mobil is already exist!"
+                message: "Failed! Merek is not found!"
             });
             return;
         } else {
-            const createValues = {
-                id_mobil: uuidv4(),
-                id_merek_mobil: req.body.id_merek_mobil,
-                id_penjual: req.body.id_penjual,
-                model: req.body.model,
-                transmisi: req.body.transmisi,
-                no_rangka: req.body.no_rangka,
-                no_mesin: req.body.no_mesin,
-                warna: req.body.warna,
-                tahun: req.body.tahun,
-                no_plat: req.body.no_plat,
-                harga: req.body.harga,
-                ket: req.body.ket                
-            };
-
-            Mobil.create(createValues)
-                .then(data => {
-                    res.status(200).send({
-                        message: "Create successfully!",
-                        data: data
-                    });
-                }).catch(err => {
-                    log.error(err)
+            Mobil.findOne({
+                where: {
+                    no_rangka: req.body.no_rangka,
+                    soft_delete: 0,
+                }
+            }).then(mobil => {
+                if (mobil) {
                     res.status(400).send({
-                        message: err.message || "Some error occurred while creating."
+                        message: "Failed! Mobil is already exist!"
                     });
-                });
+                    return;
+                } else {
+                    const createValues = {
+                        id_mobil: uuidv4(),
+                        id_merek_mobil: req.body.id_merek_mobil,
+                        id_penjual: req.body.id_penjual,
+                        model: req.body.model,
+                        transmisi: req.body.transmisi,
+                        no_rangka: req.body.no_rangka,
+                        no_mesin: req.body.no_mesin,
+                        warna: req.body.warna,
+                        tahun: req.body.tahun,
+                        no_plat: req.body.no_plat,
+                        harga: req.body.harga,
+                        ket: req.body.ket
+                    };
+
+                    Mobil.create(createValues)
+                        .then(data => {
+                            res.status(200).send({
+                                message: "Create successfully!",
+                                data: data
+                            });
+                        }).catch(err => {
+                            log.error(err)
+                            res.status(400).send({
+                                message: err.message || "Some error occurred while creating."
+                            });
+                        });
+                }
+            });
         }
     });
+
 }
 
 exports.update = (req, res) => {
@@ -86,7 +107,7 @@ exports.update = (req, res) => {
         no_plat: req.body.no_plat,
         harga: req.body.harga,
         ket: req.body.ket,
-        last_update: new Date()            
+        last_update: new Date()
     };
 
     Mobil.update(updateValues, {

@@ -25,6 +25,10 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: true,
             type: Sequelize.STRING,
         },
+        wkt_pembelian: {
+            allowNull: false,
+            type: Sequelize.DATE
+        },
         create_date: {
             allowNull: false,
             type: Sequelize.DATE,
