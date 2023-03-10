@@ -32,6 +32,9 @@ db.profil_pengguna = require("../models/profil_pengguna.model.js")(sequelize, Se
 db.merek = require("../models/merek.model.js")(sequelize, Sequelize);
 db.mobil = require("../models/mobil.model.js")(sequelize, Sequelize);
 db.pemesanan = require("../models/pemesanan.model.js")(sequelize, Sequelize);
+db.file_dok = require("../models/file_dok.model.js")(sequelize, Sequelize);
+db.file_mobil = require("../models/file_mobil.model.js")(sequelize, Sequelize);
+db.file_pemesanan = require("../models/file_pemesanan.model.js")(sequelize, Sequelize);
 
 // db.user.hasMany(db.user_role, { as: "user_role" });
 // db.user_role.belongsTo(db.user, {

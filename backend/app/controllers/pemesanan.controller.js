@@ -19,6 +19,56 @@ exports.findAll = async (req, res, next) => {
                 psn.id_pemesanan,
                 psn.status_pembelian,
                 psn.harga_pembelian,
+                psn.wkt_pembelian,
+                mbl.id_mobil,
+                mbl.model,
+                mbl.transmisi,
+                mbl.no_rangka,
+                mbl.no_mesin,
+                mbl.warna,
+                mbl.tahun,
+                mbl.no_plat,
+                mbl.harga,
+                mbl.create_date AS wkt_tambah_mobil,
+                pembeli.nama_lengkap AS nm_pembeli,
+                pembeli.tlpn_hp,
+                pembeli.create_date AS wkt_tambah_pembeli
+            FROM
+                pemesanan AS psn
+                LEFT JOIN mobil AS mbl ON mbl.id_mobil = psn.id_mobil
+                AND mbl.soft_delete = 0
+                LEFT JOIN merek_mobil AS mrk ON mrk.id_merek_mobil = mbl.id_merek_mobil
+                AND mrk.soft_delete = 0
+                LEFT JOIN profil_pengguna AS pembeli ON pembeli.id_profil = psn.id_pembeli
+                AND pembeli.soft_delete = 0
+            WHERE
+                psn.soft_delete = 0`;
+
+        const [results] = await Conn.query(sql);
+
+        res.status(200).send({
+            message: "Get list pesanan successfully!",
+            data: results
+        });
+    } catch (error) {
+        log.error(error)
+        res.status(400).send({
+            message: error.message || "Some error occurred while retrieving pesanan."
+        });
+        next();
+    }
+
+};
+
+//detail pesanan
+exports.findOne = async (req, res, next) => {
+    const id_pemesanan = req.query.id_pemesanan;
+    try {
+        let sql = `
+            SELECT
+                psn.id_pemesanan,
+                psn.status_pembelian,
+                psn.harga_pembelian,
                 psn.ket AS ket_pesan,
                 psn.wkt_pembelian,
                 mbl.id_mobil,
@@ -50,14 +100,22 @@ exports.findAll = async (req, res, next) => {
                 LEFT JOIN profil_pengguna AS pembeli ON pembeli.id_profil = psn.id_pembeli
                 AND pembeli.soft_delete = 0
             WHERE
-                psn.soft_delete = 0`;
-                
+                psn.soft_delete = 0
+                AND psn.id_pemesanan = '` + id_pemesanan + `'`;
+
         const [results] = await Conn.query(sql);
-        
-        res.status(200).send({
-            message: "Get list pesanan successfully!",
-            data: results
-        });
+
+        if (results && results.length > 0) {
+            res.status(200).send({
+                message: "Get detail pesanan successfully!",
+                data: results
+            });
+        } else {
+            res.status(200).send({
+                message: `Cannot find Pesanan with id_pemesanan=${id_pemesanan}. Maybe Pesanan was not found or req.body is empty!`,
+                data: results
+            });
+        }
     } catch (error) {
         log.error(error)
         res.status(400).send({
