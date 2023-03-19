@@ -1,0 +1,12 @@
+{"level":"error","message":"Please upload only images."}
+{"level":"error","message":"Please upload only images."}
+{"level":"error","message":"Please upload only images."}
+{"level":"error","message":"Please upload only images."}
+{"code":"LIMIT_FILE_SIZE","field":"file","level":"error","message":"File too large","name":"MulterError","storageErrors":[]}
+{"level":"error","message":"Please upload only images."}
+{"level":"error","message":"Please upload only images."}
+{"level":"error","message":"Please upload only images."}
+{"level":"error","message":"Please upload only images."}
+{"code":"LIMIT_FILE_SIZE","field":"file","level":"error","message":"File too large","name":"MulterError","storageErrors":[]}
+{"level":"error","message":"Please upload only images."}
+{"level":"error","message":"Please upload only images : png/jpeg."}

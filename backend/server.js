@@ -4,6 +4,7 @@ const cors = require("cors");
 const app = express();
 
 process.env.TZ = 'Etc/Asia';
+global.__basedir = __dirname;
 // console.log(new Date().toString())
 
 var corsOptions = {
